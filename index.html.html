@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brillandoval - Agenda Técnica</title>
+    <style>
+        /* VARIABLES DINÁMICAS */
+        :root {
+            --primary-bg: #fffaf0;
+            --accent-color: #ffd1dc;
+            --lila-base: #e6e6fa;
+            --text-color: #5d4037;
+            --header-bg: #e6e6fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--primary-bg);
+            margin: 0;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--header-bg);
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 5px solid var(--accent-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-img { max-width: 120px; border-radius: 50%; margin-bottom: 10px; display: none; margin: 0 auto; }
+        .logo-img.active { display: block; }
+
+        header h1 { margin: 0; font-size: 2rem; color: var(--text-color); }
+        header h1 span { color: #ffb6c1; }
+
+        /* PANEL DE CONFIGURACIÓN */
+        #config-panel {
+            background: #fff;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 15px;
+            display: none; /* Se activa con el botón */
+            border: 2px solid var(--accent-color);
+        }
+
+        .btn-config {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* FORMULARIOS Y TARJETAS */
+        main { padding: 15px; max-width: 600px; margin: auto; }
+
+        section {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--lila-base);
+        }
+
+        input, select, button {
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--lila-base);
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-guardar {
+            background-color: var(--accent-color);
+            border: none;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .card-cliente {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 6px solid var(--accent-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .foto-preview { width: 100%; border-radius: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <button class="btn-config" onclick="toggleConfig()">⚙️</button>
+
+    <header id="main-header">
+        <img src="" id="logo-display" class="logo-img">
+        <h1 id="nombre-display">Brillandoval</h1>
+        <p id="slogan-display">Agenda Técnica de Peluquería</p>
+    </header>
+
+    <main>
+        <section id="config-panel">
+            <h3>Personalizar Brillandoval</h3>
+            <label>Nombre de la Peluquería:</label>
+            <input type="text" id="edit-nombre" placeholder="Brillandoval">
+            
+            <label>Color de Fondo (Pastel):</label>
+            <input type="color" id="color-bg" value="#fffaf0">
+            
+            <label>Color del Banner:</label>
+            <input type="color" id="color-header" value="#e6e6fa">
+            
+            <label>Color de Acento (Botones/Detalles):</label>
+            <input type="color" id="color-accent" value="#ffd1dc">
+
+            <label>Subir Logo:</label>
+            <input type="file" id="edit-logo" accept="image/*">
+            
+            <button class="btn-guardar" onclick="saveConfig()">Aplicar Cambios</button>
+        </section>
+
+        <section>
+            <h2>Nuevo Registro</h2>
+            <form id="agenda-form">
+                <input type="text" id="nombre-cli" placeholder="Nombre de la Clienta" required>
+                <input type="tel" id="tel-cli" placeholder="WhatsApp">
+                <input type="datetime-local" id="fecha-cli" required>
+                <select id="tipo-cli">
+                    <option>Corte</option>
+                    <option>Color</option>
+                    <option>Corte y Color</option>
+                    <option>Alisado / Tratamiento</option>
+                </select>
+                <input type="text" id="formula-cli" placeholder="Fórmula técnica">
+                <input type="number" id="valor-cli" placeholder="Valor $">
+                <input type="file" id="foto-cli" accept="image/*">
+                <button type="submit" class="btn-guardar">Guardar Trabajo</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Historial</h2>
+            <div id="contenedor-clientes"></div>
+        </section>
+    </main>
+
+    <script>
+        // --- LÓGICA DE CONFIGURACIÓN VISUAL ---
+        function toggleConfig() {
+            const panel = document.getElementById('config-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function saveConfig() {
+            const config = {
+                nombre: document.getElementById('edit-nombre').value || "Brillandoval",
+                bg: document.getElementById('color-bg').value,
+                header: document.getElementById('color-header').value,
+                accent: document.getElementById('color-accent').value
+            };
+
+            const logoFile = document.getElementById('edit-logo').files[0];
+            if (logoFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    config.logo = e.target.result;
+                    applyAndStore(config);
+                };
+                reader.readAsDataURL(logoFile);
+            } else {
+                const oldConfig = JSON.parse(localStorage.getItem('brillandoval_config')) || {};
+                config.logo = oldConfig.logo || "";
+                applyAndStore(config);
+            }
+        }
+
+        function applyAndStore(config) {
+            localStorage.setItem('brillandoval_config', JSON.stringify(config));
+            applyStyles(config);
+            toggleConfig();
+        }
+
+        function applyStyles(config) {
+            document.getElementById('nombre-display').innerText = config.nombre;
+            document.documentElement.style.setProperty('--primary-bg', config.bg);
+            document.documentElement.style.setProperty('--header-bg', config.header);
+            document.documentElement.style.setProperty('--accent-color', config.accent);
+            
+            const img = document.getElementById('logo-display');
+            if (config.logo) {
+                img.src = config.logo;
+                img.classList.add('active');
+            }
+        }
+
+        // --- LÓGICA DE AGENDA ---
+        const form = document.getElementById('agenda-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const reg = {
+                id: Date.now(),
+                nombre: document.getElementById('nombre-cli').value,
+                tel: document.getElementById('tel-cli').value,
+                fecha: document.getElementById('fecha-cli').value,
+                tipo: document.getElementById('tipo-cli').value,
+                formula: document.getElementById('formula-cli').value,
+                valor: document.getElementById('valor-cli').value,
+                foto: ""
+            };
+
+            const file = document.getElementById('foto-cli').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { reg.foto = e.target.result; saveReg(reg); };
+                reader.readAsDataURL(file);
+            } else { saveReg(reg); }
+        });
+
+        function saveReg(reg) {
+            let datos = JSON.parse(localStorage.getItem('brillandoval_data')) || [];
+            datos.unshift(reg);
+            localStorage.setItem('brillandoval_data', JSON.stringify(datos));
+            form.reset();
+            render();
+        }
+
+        function render() {
+            const datos = JSON.parse(localStorage.getItem('brillandoval_data')) || [];
+            const cont = document.getElementById('contenedor-clientes');
+            cont.innerHTML = '';
+            datos.forEach(r => {
+                cont.innerHTML += `
+                    <div class="card-cliente">
+                        <strong>${r.nombre}</strong> - ${r.tipo}
+                        <p>📅 ${new Date(r.fecha).toLocaleString()}</p>
+                        <p>🧪 ${r.formula}</p>
+                        <p>💰 $${r.valor}</p>
+                        ${r.foto ? `<img src="${r.foto}" class="foto-preview">` : ''}
+                        <a href="https://wa.me/${r.tel}" style="color:green; text-decoration:none;">WhatsApp 💬</a>
+                    </div>`;
+            });
+        }
+
+        // Cargar todo al inicio
+        const savedConfig = JSON.parse(localStorage.getItem('brillandoval_config'));
+        if (savedConfig) applyStyles(savedConfig);
+        render();
+    </script>
+</body>
+</html>
